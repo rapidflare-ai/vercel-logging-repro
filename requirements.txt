@@ -1,0 +1,9 @@
+fastapi
+#supabase
+#angchain
+uvicorn
+pydantic
+#openai
+#tiktoken # Weird langchain implicitly depends on it and needs a manual import
+#logtail-python
+#requests
