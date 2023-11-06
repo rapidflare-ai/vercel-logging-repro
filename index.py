@@ -4,14 +4,12 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
-from models import ChatRequest
-from models.apiv2_types import ChatRequestV2, ConversationFeedback, FeedbackRequest, FeedbackResponse
-from models import ChatResponse
-from chat import Conversation
-from chat.conversation_v2 import Conversation_V2
-from models.apiv2_types import ChatResponseV2
-from utils.config import Config, DeploymentCloud, DeploymentEnv
-from uuid import uuid4
+from pydantic import BaseModel
+
+class ChatRequest(BaseModel):
+    question: str
+    username: str
+
 
 origins = [
     "*"
@@ -26,11 +24,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-logger = logging.getLogger()
+rootLogger = logging.getLogger()
+
+# 3. Create and configure a console handler for all environments
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)  # Set log level to INFO for this handler
+console_formatter = logging.Formatter('%(levelname)-5.5s: %(asctime)s %(filename)s:%(lineno)d - %(message)s',
+                                        datefmt='%Y-%m-%d,%H:%M:%S')
+console_handler.setFormatter(console_formatter)
+rootLogger.addHandler(console_handler)    
+logger = logging.getLogger('MyLogger')
+logger.setLevel(logging.INFO)
 
 @app.post("/qa")
-def qa(request: str) -> str:
-    logger.info(f'[/qa] - question: {request}')    
-    response = f'You posted: {request}';
+def qa(request: ChatRequest) -> str:
+    logger.info(f'[/qa] - question: {request.question} from {request.username}')
+    response = f'{request.username} asked {request.question}'
     return response
 
